@@ -51,9 +51,9 @@ SDL_Surface *img_yellow_brick;
 
 Uint8 done;
 int dx = 2;
-int dy = 2;
-Uint8 ball_x = (320 / 2) - 4;
-Uint8 ball_y = 240 - 32;
+int dy = -2;
+int ball_x = (320 / 2) - 4;
+int ball_y = 240 - 32;
 Uint8 lives = 5;
 
 paddle_t paddle;
@@ -112,13 +112,13 @@ Uint8 is_colliding(int x, int y, bricks_t brick){
 void handle_key(){
     Uint8 *keystates = SDL_GetKeyState(NULL);
 
-    if(keystates[SDLK_LEFT]){
+    if(keystates[SDLK_LEFT] || keystates[SDLK_4]){
         if((paddle.x) - 4 > 0){
             paddle.x -= 4;
         }
     }
 
-    if(keystates[SDLK_RIGHT]){
+    if(keystates[SDLK_RIGHT] || keystates[SDLK_6]){
         if(paddle.x + 64 + 4 < 320){
             paddle.x += 4;
         }
@@ -149,12 +149,10 @@ void make_direction(){
         dx = -dx;
     }
 
-    if(cy){
-        dy = -dy;
-    }
+    dy = -dy;
 }
 
-int bounce_delay = 0;
+
 void render(){
     if(lives == 0){
         draw_image(img_gameover, screen, 0 , 0);
@@ -165,11 +163,11 @@ void render(){
 
     //Draw Background
     draw_image(background, screen, 0, 0);
-    SDL_Flip(screen);
+    //SDL_Flip(screen);
 
     //Draw Paddle
     draw_image(img_paddle, screen, paddle.x, paddle.y);
-    SDL_Flip(screen);
+    //SDL_Flip(screen);
 
     Uint8 colliding = 0;
 
@@ -202,7 +200,7 @@ void render(){
 
         if(bricks[i].active){
             draw_image(img, screen, bricks[i].x, bricks[i].y);
-            SDL_Flip(screen);
+            //SDL_Flip(screen);
         }
     }
 
@@ -214,21 +212,24 @@ void render(){
     //Draw ball
     if(ball_x + dx > 320 - 4 || ball_x + dx < 4 || colliding || is_colliding(ball_x + dx, ball_y + dy, brick)){
         make_direction();
-    }
+    }else 
 
     if(ball_y + dy > 240 - 4){
         lives--;
+        ball_x = (320 / 2) - 4;
+        ball_y = 240 - 32;
         make_direction();
-    }
+    }else
 
     if(ball_y + dy < 4 || colliding || is_colliding(ball_x + dx, ball_y + dy, brick)){
         make_direction();
     }
+
     ball_x += dx;
     ball_y += dy;
 
     draw_image(img_ball, screen, ball_x, ball_y);
-    SDL_Flip(screen);
+    //SDL_Flip(screen);
 }
 
 
@@ -260,6 +261,10 @@ int main(int argc, char *argv[]){
 
     paddle.x = (320 / 2) - 32;
     paddle.y = 240 - 16;
+
+    draw_image(img_menu, screen, 0, 0);
+    SDL_Flip(screen);
+    SDL_Delay(2000);
 
     for(int x = 0; x < 11; x++){
         for(int y = 1; y < 8; y++){
@@ -295,11 +300,11 @@ int main(int argc, char *argv[]){
         
         
         SDL_Flip(screen);
-        //SDL_Delay(30);
+        SDL_Delay(30);
     }
 
-    SDL_Delay(500);
-    SDL_Quit();
+    //SDL_Delay(500);
+    //SDL_Quit();
     return 0;
 }
 
