@@ -61,7 +61,7 @@ bricks_t bricks[8*11];
 
 void init(void){
     SDL_Init(SDL_INIT_VIDEO);
-    screen = SDL_SetVideoMode(320, 240, 32, SDL_SWSURFACE);
+    screen = SDL_SetVideoMode(320, 240, has_colors ? 16 : 8, SDL_SWSURFACE);
     done = SDL_FALSE;
 }
 
@@ -69,6 +69,12 @@ void quit(void){
     SDL_FreeSurface(screen);
     SDL_FreeSurface(img_paddle);
     SDL_FreeSurface(img_ball);
+    SDL_FreeSurface(img_yellow_brick);
+
+    SDL_FreeSurface(img_green_brick);
+    SDL_FreeSurface(img_red_brick);
+    SDL_FreeSurface(background);
+    SDL_FreeSurface(img_gameover);
     
 
     SDL_Quit();
@@ -169,7 +175,7 @@ void render(){
 
     //Draw bricks
     for(int i = 0; i < 8*11; i++){
-        SDL_Surface *img = malloc(img_red_brick);
+        SDL_Surface *img = malloc(sizeof(img_red_brick));
         switch (bricks[i].color)
         {
         case RED:
