@@ -45,6 +45,7 @@ int dx = 2;
 int dy = 2;
 Uint8 ball_x = (320 / 2) - 4;
 Uint8 ball_y = 240 - 32;
+Uint8 lives = 5;
 
 paddle_t paddle;
 bricks_t bricks[8*11];
@@ -125,10 +126,27 @@ void handle_key(){
 
 }
 
+void make_direction(){
+    Uint8 cx = randomUint(0, 1);
+    Uint8 cy = randomUint(0, 1);
+
+    if(cx){
+        dx = -dx;
+    }
+
+    if(cy){
+        dy = -dy;
+    }
+}
+
 int bounce_delay = 0;
 void render(){
-    
-
+    if(lives == 0){
+        draw_image(img_gameover, screen, 0 , 0);
+        SDL_Flip(screen);
+        SDL_Delay(2000);
+        quit();
+    }
 
     //Draw Background
     draw_image(background, screen, 0, 0);
@@ -162,7 +180,10 @@ void render(){
         }
 
         colliding = is_colliding(ball_x + dx, ball_y + dy, bricks[i]) && bricks[i].active;
-        if(colliding) bricks[i].active = 0;
+        if(colliding) {
+            bricks[i].active = 0;
+            make_direction();
+        }
 
         if(bricks[i].active){
             draw_image(img, screen, bricks[i].x, bricks[i].y);
@@ -177,11 +198,16 @@ void render(){
     brick.y = paddle.y;
     //Draw ball
     if(ball_x + dx > 320 - 4 || ball_x + dx < 4 || colliding || is_colliding(ball_x + dx, ball_y + dy, brick)){
-        dx = -dx;
+        make_direction();
     }
 
-    if(ball_y + dy > 240 - 4 || ball_y + dy < 4  || colliding || is_colliding(ball_x + dx, ball_y + dy, brick)){
-        dy = -dy;
+    if(ball_y + dy > 240 - 4){
+        lives--;
+        make_direction();
+    }
+
+    if(ball_y + dy < 4 || colliding || is_colliding(ball_x + dx, ball_y + dy, brick)){
+        make_direction();
     }
     ball_x += dx;
     ball_y += dy;
