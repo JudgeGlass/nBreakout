@@ -1,10 +1,19 @@
+#include <os.h>
+#include <SDL/SDL_config.h>
 #include <SDL/SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
 #include "apple.h"
-#include "player.h"
+#include "bumper.h"
+#include "gameover.h"
+#include "background.h"
+#include "green_brick.h"
+#include "menu.h"
+#include "orange_brick.h"
+#include "red_brick.h"
+#include "yellow_brick.h"
 
 enum Color{
     RED,
@@ -222,16 +231,26 @@ int main(int argc, char *argv[]){
 
     init();
 
-    background = load_image("background.bmp");
-    img_gameover = load_image("gameover.bmp");
-    img_menu = load_image("menu.bmp");
-    img_paddle = load_image("bumper.bmp");
-    img_ball = load_image("ball.bmp");
+    background = nSDL_LoadImage(image_background);
+    img_gameover = nSDL_LoadImage(image_gameover);
+    img_menu = nSDL_LoadImage(image_menu);
+    img_paddle = nSDL_LoadImage(image_bumper);
+    img_ball = nSDL_LoadImage(image_ball);
+    // background = load_image("background.bmp");
+    // img_gameover = load_image("gameover.bmp");
+    // img_menu = load_image("menu.bmp");
+    // img_paddle = load_image("bumper.bmp");
+    // img_ball = load_image("ball.bmp");
 
-    img_red_brick = load_image("red_brick.bmp");
-    img_orange_brick = load_image("orange_brick.bmp");
-    img_green_brick = load_image("green_brick.bmp");
-    img_yellow_brick = load_image("yellow_brick.bmp");
+
+    img_red_brick = nSDL_LoadImage(image_red_brick);
+    img_green_brick = nSDL_LoadImage(image_green_brick);
+    img_orange_brick = nSDL_LoadImage(image_orange_brick);
+    img_yellow_brick = nSDL_LoadImage(image_yellow_brick);
+    // img_red_brick = load_image("red_brick.bmp");
+    // img_orange_brick = load_image("orange_brick.bmp");
+    // img_green_brick = load_image("green_brick.bmp");
+    // img_yellow_brick = load_image("yellow_brick.bmp");
 
     paddle.x = (320 / 2) - 32;
     paddle.y = 240 - 16;
