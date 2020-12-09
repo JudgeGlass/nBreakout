@@ -295,7 +295,7 @@ int main(int argc, char *argv[]){
         
         
         SDL_Flip(screen);
-        SDL_Delay(30);
+        //SDL_Delay(30);
     }
 
     SDL_Delay(500);
