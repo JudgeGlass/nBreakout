@@ -6,10 +6,27 @@
 #include "apple.h"
 #include "player.h"
 
+enum Color{
+    RED,
+    ORANGE,
+    GREEN,
+    YELLOW
+};
+
+
 typedef struct Paddle {
     int x;
     int y;
 } paddle_t;
+
+typedef struct Bricks {
+    int x;
+    int y;
+    int w;
+    int h;
+    Uint8 active;
+    enum Color color;
+} bricks_t;
 
 
 SDL_Surface *screen;
@@ -18,10 +35,19 @@ SDL_Surface *img_gameover;
 SDL_Surface *img_menu;
 SDL_Surface *img_paddle;
 SDL_Surface *img_ball;
+SDL_Surface *img_red_brick;
+SDL_Surface *img_orange_brick;
+SDL_Surface *img_green_brick;
+SDL_Surface *img_yellow_brick;
 
 Uint8 done;
+int dx = 2;
+int dy = 2;
+Uint8 ball_x = (320 / 2) - 4;
+Uint8 ball_y = 240 - 32;
 
 paddle_t paddle;
+bricks_t bricks[8*11];
 
 void init(void){
     SDL_Init(SDL_INIT_VIDEO);
@@ -58,10 +84,17 @@ void draw_image(SDL_Surface* src, SDL_Surface* des, int x, int y){
     SDL_BlitSurface(src, NULL, des, &rect_pos);
 }
 
+Uint8 is_colliding(int x, int y, bricks_t brick){
+    if(x < (brick.x + brick.w) && (x + 8) > brick.x && y < (brick.y + brick.h) && y + 8 > brick.y){
+        return 1;
+    }
+
+    return 0;
+}
+
 
 void handle_key(){
     Uint8 *keystates = SDL_GetKeyState(NULL);
-
 
     if(keystates[SDLK_LEFT]){
         if((paddle.x) - 4 > 0){
@@ -92,7 +125,11 @@ void handle_key(){
 
 }
 
+int bounce_delay = 0;
 void render(){
+    
+
+
     //Draw Background
     draw_image(background, screen, 0, 0);
     SDL_Flip(screen);
@@ -101,7 +138,56 @@ void render(){
     draw_image(img_paddle, screen, paddle.x, paddle.y);
     SDL_Flip(screen);
 
+    Uint8 colliding = 0;
 
+    //Draw bricks
+    for(int i = 0; i < 8*11; i++){
+        SDL_Surface *img = malloc(img_red_brick);
+        switch (bricks[i].color)
+        {
+        case RED:
+            img = img_red_brick;
+            break;
+        case ORANGE:
+            img = img_orange_brick;
+            break;
+        case GREEN:
+            img = img_green_brick;
+            break;
+        case YELLOW:
+            img = img_yellow_brick;
+            break;
+        default:
+            break;
+        }
+
+        colliding = is_colliding(ball_x + dx, ball_y + dy, bricks[i]) && bricks[i].active;
+        if(colliding) bricks[i].active = 0;
+
+        if(bricks[i].active){
+            draw_image(img, screen, bricks[i].x, bricks[i].y);
+            SDL_Flip(screen);
+        }
+    }
+
+    bricks_t brick;
+    brick.h = 8;
+    brick.w = 64;
+    brick.x = paddle.x;
+    brick.y = paddle.y;
+    //Draw ball
+    if(ball_x + dx > 320 - 4 || ball_x + dx < 4 || colliding || is_colliding(ball_x + dx, ball_y + dy, brick)){
+        dx = -dx;
+    }
+
+    if(ball_y + dy > 240 - 4 || ball_y + dy < 4  || colliding || is_colliding(ball_x + dx, ball_y + dy, brick)){
+        dy = -dy;
+    }
+    ball_x += dx;
+    ball_y += dy;
+
+    draw_image(img_ball, screen, ball_x, ball_y);
+    SDL_Flip(screen);
 }
 
 
@@ -116,8 +202,37 @@ int main(int argc, char *argv[]){
     img_paddle = load_image("bumper.bmp");
     img_ball = load_image("ball.bmp");
 
+    img_red_brick = load_image("red_brick.bmp");
+    img_orange_brick = load_image("orange_brick.bmp");
+    img_green_brick = load_image("green_brick.bmp");
+    img_yellow_brick = load_image("yellow_brick.bmp");
+
     paddle.x = (320 / 2) - 32;
     paddle.y = 240 - 16;
+
+    for(int x = 0; x < 11; x++){
+        for(int y = 1; y < 8; y++){
+            bricks[x + y * 11].x = (x * 28) + 8;
+            bricks[x + y * 11].y = (y * 16);
+            bricks[x + y * 11].w = 24;
+            bricks[x + y * 11].h = 8;
+            bricks[x + y * 11].active = 1;
+            
+            enum Color color = RED;
+
+            if(y == 1 || y == 2){
+                color = RED;
+            }else if(y == 3 || y == 4){
+                color = ORANGE;
+            }else if(y == 5 || y == 6){
+                color = GREEN;
+            }else{
+                color = YELLOW;
+            }
+
+            bricks[x + y*11].color = color;
+        }
+    }
     
 
     while(!done){
@@ -129,7 +244,7 @@ int main(int argc, char *argv[]){
         
         
         SDL_Flip(screen);
-        SDL_Delay(20);
+        SDL_Delay(30);
     }
 
     SDL_Delay(500);
